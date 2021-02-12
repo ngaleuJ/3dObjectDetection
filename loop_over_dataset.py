@@ -79,10 +79,10 @@ lidar = None # init lidar sensor object
 camera = None # init camera sensor object
 
 ## Selective execution and visualization
-exec_data = ['pcl_from_rangeimage']
-exec_detection = ['bev_from_pcl'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_data = []
+exec_detection = [] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
 exec_tracking = [] # options are 'perform_tracking'
-exec_visualization = [] # options are 'show_range_image', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
+exec_visualization = ['show_range_image'] # options are 'show_range_image', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
 exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization)
 vis_pause_time = 10 # set pause time between frames in ms (0 = stop between frames until key is pressed)
 
@@ -181,7 +181,7 @@ while True:
         if 'show_range_image' in exec_list:
             img_range = pcl.show_range_image(frame)
             img_range = img_range.astype(np.uint8)
-            cv2.imshow('range_image', img_range)
+            cv2.imshow('range_image_stacked', img_range)
             cv2.waitKey(vis_pause_time)
 
         if 'show_pcl' in exec_list:

@@ -83,34 +83,27 @@ def show_range_image(frame):
     lidar_name = dataset_pb2.LaserName.TOP
     lidar = waymo_utils.get(frame.lasers, lidar_name)
     range_image, camera_projection, range_image_pose = waymo_utils.parse_range_image_and_camera_projection(lidar)
-    
     # step 2 : extract the range and the intensity channel from the range image
     range_image_range = range_image[...,0]
     range_image_intensity = range_image[...,1]
     
     # step 3 : set values <0 to zero
-    range_image_range[range_image_range<0]=0.0
+    range_image_range = np.where(range_image_range < 0, 0, range_image_range)
+    range_image_intensity = np.where(range_image_intensity < 0, 0, range_image_intensity)
     
     # step 4 : map the range channel onto an 8-bit scale and make sure that the full range of values is appropriately considered
-    range_image_range = range_image_range[...,0]
     range_image_range = range_image_range*255/(np.amax(range_image_range) - np.amin(range_image_range))
     range_image_range = range_image_range.astype(np.uint8)
     cv2.imshow('range image', range_image_range)
     cv2.waitKey(0)
     # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
-    
-    range_image_intensity = np.amax(range_image_intensity)/2 * range_image_intensity * 255 / (np.amax(range_image_intensity) - np.amin(range_image_intensity)) 
+    range_image_intensity = np.amax(range_image_intensity)/2 * range_image_intensity * 255 / (np.amax(range_image_intensity) - np.amin(range_image_intensity))
+    range_image_intensity = range_image_intensity.astype(np.uint8)
     cv2.imshow('intensity image', range_image_intensity)
     cv2.waitKey(0)
-
-    #mean, std = np.mean(range_image_intensity), np.std(range_image_intensity)
-    #ri_norm = (range_image_intensity-mean)/std
-    range_intensity = range_image_intensity.astype(np.uint8)
-    
     # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
-    ri= np.vstack((range_image_range, range_intensity))
+    ri= np.vstack((range_image_range, range_image_intensity))
     ri = ri.astype(np.uint8)
-
     img_range_intensity = ri 
     #######
     ####### ID_S1_EX1 END #######     
