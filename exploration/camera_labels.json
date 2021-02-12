@@ -1,0 +1,169 @@
+[
+name: FRONT
+labels {
+  box {
+    center_x: 809.6983799999999
+    center_y: 720.0126
+    width: 75.15921000000003
+    length: 89.68578000000002
+  }
+  type: TYPE_VEHICLE
+  id: "1a7162c2-e63a-42b2-96dd-9f3ba7ee5568"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 969.49065
+    center_y: 681.48561
+    width: 22.10564999999997
+    length: 31.579500000000053
+  }
+  type: TYPE_VEHICLE
+  id: "1fa810d1-9956-4238-8ca5-41d8a0203cc9"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 954.96408
+    center_y: 671.3801699999999
+    width: 12.631799999999998
+    length: 13.263389999999958
+  }
+  type: TYPE_VEHICLE
+  id: "3b6a8c8c-7940-453d-a22c-4c3bd9ed9c1c"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 500.21928
+    center_y: 841.27788
+    width: 228.00398999999993
+    length: 324.00567000000007
+  }
+  type: TYPE_VEHICLE
+  id: "4556db94-47bc-4f0d-b73b-a938aa20d89a"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 956.85885
+    center_y: 751.5921
+    width: 126.31799999999998
+    length: 133.26549
+  }
+  type: TYPE_VEHICLE
+  id: "633f5169-e8ba-418a-aaff-5a00f3c3e311"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 910.75278
+    center_y: 671.38017
+    width: 6.315900000000056
+    length: 8.21067000000005
+  }
+  type: TYPE_VEHICLE
+  id: "6e8af071-5f11-4ef3-aa1f-f0b06c36ed21"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 711.1703400000001
+    center_y: 716.85465
+    width: 51.158789999999954
+    length: 80.21193000000005
+  }
+  type: TYPE_VEHICLE
+  id: "7c79b738-419e-4ebf-acae-e8d26a102eaa"
+}
+labels {
+  box {
+    center_x: 1083.80844
+    center_y: 683.38038
+    width: 31.579500000000053
+    length: 12.631800000000112
+  }
+  type: TYPE_PEDESTRIAN
+  id: "928417c7-4428-4d0f-b95a-1174c111216f"
+}
+labels {
+  box {
+    center_x: 849.48855
+    center_y: 689.0646899999999
+    width: 33.47427000000005
+    length: 36.63221999999996
+  }
+  type: TYPE_VEHICLE
+  id: "9a2edf71-3abf-4eea-9983-b3cb4f78a67f"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 902.5421100000001
+    center_y: 680.85402
+    width: 16.421339999999987
+    length: 22.737240000000043
+  }
+  type: TYPE_VEHICLE
+  id: "a52a6c64-1228-401e-8a3e-6e8c97af0bf6"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 1046.5446299999999
+    center_y: 682.74879
+    width: 7.579079999999976
+    length: 7.579079999999976
+  }
+  type: TYPE_PEDESTRIAN
+  id: "dce176f4-b1b0-47fd-8ccd-8eac35fd896a"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 1062.33438
+    center_y: 684.64356
+    width: 10.737030000000004
+    length: 8.210669999999936
+  }
+  type: TYPE_PEDESTRIAN
+  id: "e37e0bbf-d65b-4b6a-92f4-48074cf6a7b5"
+}
+labels {
+  box {
+    center_x: 993.4910699999998
+    center_y: 665.06427
+    width: 25.895189999999957
+    length: 52.42196999999999
+  }
+  type: TYPE_VEHICLE
+  id: "f1e4b26a-a141-40cf-9a5c-e6cff8a146ec"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+labels {
+  box {
+    center_x: 1046.5446299999999
+    center_y: 677.69607
+    width: 19.579290000000015
+    length: 13.263390000000072
+  }
+  type: TYPE_PEDESTRIAN
+  id: "f48ea8fd-1416-4bd6-a457-befd8465182f"
+  detection_difficulty_level: LEVEL_2
+  tracking_difficulty_level: LEVEL_2
+}
+, name: FRONT_LEFT
+, name: SIDE_LEFT
+, name: FRONT_RIGHT
+, name: SIDE_RIGHT
+]
