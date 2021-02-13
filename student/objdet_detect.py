@@ -14,6 +14,7 @@
 import numpy as np
 import torch
 from easydict import EasyDict as edict
+import argparse
 
 # add project directory to python path to enable relative imports
 import os
@@ -25,9 +26,13 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 # model-related
 from tools.objdet_models.resnet.models import fpn_resnet
 from tools.objdet_models.resnet.utils.evaluation_utils import decode, post_processing 
+from tools.objdet_models.resnet.utils.torch_utils import _sigmoid
+from tools.objdet_models.resnet.utils.evaluation_utils import time_synchronized
 
 from tools.objdet_models.darknet.models.darknet2pytorch import Darknet as darknet
 from tools.objdet_models.darknet.utils.evaluation_utils import post_processing_v2
+
+from tools.waymo_reader.simple_waymo_open_dataset_reader import utils as waymo_utils
 
 
 # load model-related parameters into an edict
@@ -62,6 +67,71 @@ def load_configs_model(model_name='darknet', configs=None):
         ####### ID_S3_EX1-3 START #######     
         #######
         print("student task ID_S3_EX1-3")
+        '''
+        parser = argparse.ArgumentParser(description='Testing config for the Implementation')
+        parser.add_argument('--saved_fn', type=str, default='fpn_resnet_18', metavar='FN',
+                        help='The name using for saving logs, models,...')
+        parser.add_argument('-a', '--arch', type=str, default='fpn_resnet_18', metavar='ARCH',
+                        help='The name of the model architecture')
+        parser.add_argument('--pretrained_path', type=str,
+                        default='../checkpoints/fpn_resnet_18/fpn_resnet_18_epoch_300.pth', metavar='PATH',
+                        help='the path of the pretrained checkpoint')
+        parser.add_argument('--K', type=int, default=50,
+                        help='the number of top K')
+        parser.add_argument('--no_cuda', action='store_true',
+                        help='If true, cuda is not used.')
+        parser.add_argument('--gpu_idx', default=0, type=int,
+                        help='GPU index to use.')
+        parser.add_argument('--num_samples', type=int, default=None,
+                        help='Take a subset of the dataset to run and debug')
+        parser.add_argument('--num_workers', type=int, default=1,
+                        help='Number of threads for loading data')
+        parser.add_argument('--batch_size', type=int, default=1,
+                        help='mini-batch size (default: 4)')
+        parser.add_argument('--peak_thresh', type=float, default=0.2)
+        parser.add_argument('--save_test_output', action='store_true',
+                        help='If true, the output image of the testing phase will be saved')
+        parser.add_argument('--output_format', type=str, default='image', metavar='PATH',
+                        help='the type of the test output (support image or video)')
+        parser.add_argument('--output_video_fn', type=str, default='out_fpn_resnet_18', metavar='PATH',
+                        help='the video filename if the output format is video')
+        parser.add_argument('--output-width', type=int, default=608,
+                        help='the width of showing output, the height maybe vary')
+
+        configs = edict(vars(parser.parse_args()))
+        '''
+        configs.arch = 'fpn_resnet_18'
+        configs.pin_memory = True
+        configs.distributed = False  # For testing on 1 GPU only
+        configs.K = 50
+        configs.peak_thresh = 0.2
+
+        configs.input_size = (608, 608)
+        configs.hm_size = (152, 152)
+        configs.down_ratio = 4
+        configs.max_objects = 50
+
+        configs.imagenet_pretrained = False
+        configs.head_conv = 64
+        configs.num_classes = 3
+        configs.num_center_offset = 2
+        configs.num_z = 1
+        configs.num_dim = 3
+        configs.num_direction = 2  # sin, cos
+        
+
+        configs.heads = {
+            'hm_cen': configs.num_classes,
+            'cen_offset': configs.num_center_offset,
+            'direction': configs.num_direction,
+            'z_coor': configs.num_z,
+            'dim': configs.num_dim
+        }
+        configs.num_input_features = 4
+        configs.model_path = os.path.join(parent_path, 'tools', 'objdet_models', 'resnet')
+        configs.pretrained_filename = os.path.join(configs.model_path, 'pretrained', 'fpn_resnet_18_epoch_300.pth')
+
+        
 
         #######
         ####### ID_S3_EX1-3 END #######     
@@ -113,13 +183,15 @@ def create_model(configs):
         print('using darknet')
         model = darknet(cfgfile=configs.cfgfile, use_giou_loss=configs.use_giou_loss)    
     
-    elif 'fpn_resnet' in configs.arch:
+    elif 'fpn_resnet_18' in configs.arch:
         print('using ResNet architecture with feature pyramid')
         
         ####### ID_S3_EX1-4 START #######     
         #######
         print("student task ID_S3_EX1-4")
-
+        #print('using resnet')
+        configs = load_configs('fpn_resnet')
+        model = waymo_utils.create_model(configs)
         #######
         ####### ID_S3_EX1-4 END #######     
     
@@ -127,6 +199,7 @@ def create_model(configs):
         assert False, 'Undefined model backbone'
 
     # load model weights
+    
     model.load_state_dict(torch.load(configs.pretrained_filename, map_location='cpu'))
     print('Loaded weights from {}\n'.format(configs.pretrained_filename))
 
@@ -167,8 +240,22 @@ def detect_objects(input_bev_maps, model, configs):
             
             ####### ID_S3_EX1-5 START #######     
             #######
+            
             print("student task ID_S3_EX1-5")
 
+            detections = []
+            outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
+            outputs['cen_offset'] = _sigmoid(outputs['cen_offset'])
+            # detections size (batch_size, K, 10)
+            detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
+                                outputs['dim'], K=configs.K)
+            detections = detections.cpu().numpy().astype(np.float32)
+            detections = post_processing(detections, configs)
+            #detections = post_processing(detections)
+            t2 = time_synchronized()
+
+            detections = detections[0]  # only first batch
+            print(detections)
             #######
             ####### ID_S3_EX1-5 END #######     
 

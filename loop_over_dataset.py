@@ -53,16 +53,17 @@ import misc.params as params
 data_filename = 'training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord' # Sequence 1
 #data_filename = 'training_segment-10072231702153043603_5725_000_5745_000_with_camera_labels.tfrecord' # Sequence 2
 #data_filename = 'training_segment-10963653239323173269_1924_000_1944_000_with_camera_labels.tfrecord' # Sequence 3
-show_only_frames = [0, 1] # show only frames in interval for debugging
+show_only_frames = [50, 51] # show only frames in interval for debugging
 
 ## Prepare Waymo Open Dataset file for loading
 data_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dataset', data_filename) # adjustable path in case this script is called from another working directory
-results_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'results')
+results_fullpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'results\\darknet')
+results_fullpath1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'results\\resnet')
 datafile = WaymoDataFileReader(data_fullpath)
 datafile_iter = iter(datafile)  # initialize dataset iterator
 
 ## Initialize object detection
-configs_det = det.load_configs(model_name='darknet') # options are 'darknet', 'fpn_resnet'
+configs_det = det.load_configs(model_name='fpn_resnet') # options are 'darknet', 'fpn_resnet'
 model_det = det.create_model(configs_det)
 
 configs_det.use_labels_as_objects = False # True = use groundtruth labels as objects, False = use model-based detection TODO remove in student version
@@ -79,10 +80,10 @@ lidar = None # init lidar sensor object
 camera = None # init camera sensor object
 
 ## Selective execution and visualization
-exec_data = []
-exec_detection = [] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
+exec_data = ['pcl_from_rangeimage', 'load_image']
+exec_detection = ['bev_from_pcl', 'detect_objects'] # options are 'bev_from_pcl', 'detect_objects', 'validate_object_labels', 'measure_detection_performance'; options not in the list will be loaded from file
 exec_tracking = [] # options are 'perform_tracking'
-exec_visualization = ['show_range_image'] # options are 'show_range_image', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
+exec_visualization = ['show_objects_in_bev_labels_in_camera'] # options are 'show_range_image', 'show_labels_in_image', 'show_objects_and_labels_in_bev', 'show_objects_in_bev_labels_in_camera', 'show_tracks', 'show_detection_performance', 'make_tracking_movie'
 exec_list = make_exec_list(exec_detection, exec_tracking, exec_visualization)
 vis_pause_time = 10 # set pause time between frames in ms (0 = stop between frames until key is pressed)
 
@@ -126,7 +127,7 @@ while True:
                 save_object_to_file(lidar_pcl, results_fullpath, data_filename, 'lidar_pcl', cnt_frame)
         else:
             print('loading lidar point-cloud from result file')
-            #lidar_pcl = load_object_from_file(results_fullpath, data_filename, 'lidar_pcl', cnt_frame)
+            lidar_pcl = load_object_from_file(results_fullpath, data_filename, 'lidar_pcl', cnt_frame)
             
         ## Compute lidar birds-eye view (bev)
         if 'bev_from_pcl' in exec_list:
@@ -136,7 +137,7 @@ while True:
                 save_object_to_file(lidar_bev, results_fullpath, data_filename, 'lidar_bev', cnt_frame)
         else:
             print('loading birds-eve view from result file')
-            #lidar_bev = load_object_from_file(results_fullpath, data_filename, 'lidar_bev', cnt_frame)
+            lidar_bev = load_object_from_file(results_fullpath, data_filename, 'lidar_bev', cnt_frame)
 
         ## 3D object detection
         if (configs_det.use_labels_as_objects==True):
@@ -151,7 +152,7 @@ while True:
                     save_object_to_file(detections, results_fullpath, data_filename, 'detections', cnt_frame)
             else:
                 print('loading detected objects from result file')
-                #detections = load_object_from_file(results_fullpath, data_filename, 'detections', cnt_frame)
+                detections = load_object_from_file(results_fullpath, data_filename, 'detections', cnt_frame)
 
         ## Validate object labels
         if 'validate_object_labels' in exec_list:
@@ -161,7 +162,7 @@ while True:
                 save_object_to_file(valid_label_flags, results_fullpath, data_filename, 'valid_labels', cnt_frame)
         else:
             print('loading object labels and validation from result file')
-            #valid_label_flags = load_object_from_file(results_fullpath, data_filename, 'valid_labels', cnt_frame)            
+            valid_label_flags = load_object_from_file(results_fullpath, data_filename, 'valid_labels', cnt_frame)            
 
         ## Performance evaluation for object detection
         if 'measure_detection_performance' in exec_list:
