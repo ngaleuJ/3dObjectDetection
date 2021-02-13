@@ -162,7 +162,7 @@ def bev_from_pcl(lidar_pcl, configs):
     print("student task ID_S2_EX2")
 
     ## step 1 : create a numpy array filled with zeros which has the same dimensions as the BEV map
-    intensity_map = np.zeros(shape=(configs.bev_height+1,configs.bev_width+1))
+    intensity_map = np.zeros(shape=(configs.bev_height,configs.bev_width))
 
     # step 2 : re-arrange elements in lidar_pcl_cpy by sorting first by x, then y, then -z (use numpy.lexsort)
     #print(lidar_pcl_cpy.shape)
@@ -202,7 +202,7 @@ def bev_from_pcl(lidar_pcl, configs):
     print("student task ID_S2_EX3")
 
     ## step 1 : create a numpy array filled with zeros which has the same dimensions as the BEV map
-    height_map = np.zeros(shape=(configs.bev_height+1,configs.bev_width+1))
+    height_map = np.zeros(shape=(configs.bev_height,configs.bev_width))
 
     ## step 2 : assign the height value of each unique entry in lidar_top_pcl to the height map 
     ##          make sure that each entry is normalized on the difference between the upper and lower height defined in the config file
@@ -233,10 +233,10 @@ def bev_from_pcl(lidar_pcl, configs):
     s1, s2, s3 = bev_map.shape
     bev_maps = np.zeros((1, s1, s2, s3))
     bev_maps[0] = bev_map
-
     bev_maps = torch.from_numpy(bev_maps)  # create tensor from birds-eye view
     input_bev_maps = bev_maps.to(configs.device, non_blocking=True).float()
     
+  
     return input_bev_maps
 
 
