@@ -1,3 +1,5 @@
+_pycache_
 /dataset
 /results
-/tools
+/tools/object_models/darknet/pretrained/
+/tools/objdet_models/resnet/pretrained/
