@@ -102,17 +102,26 @@ def load_configs_model(model_name='darknet', configs=None):
 
         configs = edict(vars(parser.parse_args()))
         '''
+
+        configs.saved_fn = 'fpm_resnet_18'
+        configs.pretrained_path = '../checkpoints/fpn_resnet_18/fpn_resnet_18_epoch_300.pth'
+        configs.no_cuda = False
+        configs.gpu_idx = 0
+        configs.num_samples = None
+        configs.num_workers = 1
         configs.arch = 'fpn_resnet_18'
         configs.pin_memory = True
         configs.distributed = False  # For testing on 1 GPU only
         configs.K = 50
         configs.peak_thresh = 0.2
-        configs.batch_size = 4
+        configs.batch_size = 1
+        configs.save_test_output = False
+        configs.output_format = 'image'
+        configs.output_video_fn = 'out_fpn_resnet_18'
         configs.input_size = (608, 608)
         configs.hm_size = (152, 152)
         configs.down_ratio = 4
         configs.max_objects = 50
-
         configs.imagenet_pretrained = False
         configs.head_conv = 64
         configs.num_classes = 3
@@ -245,8 +254,9 @@ def detect_objects(input_bev_maps, model, configs):
             #######
             
             print("student task ID_S3_EX1-5")
-    
+            #input_bev_maps = input_bev_maps.unsqueeze(0).to(configs.device, non_blocking=True).float()
             t1 = time_synchronized()
+            #outputs = model(input_bev_maps)
             outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
             outputs['cen_offset'] = _sigmoid(outputs['cen_offset'])
             detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
@@ -256,8 +266,8 @@ def detect_objects(input_bev_maps, model, configs):
             detections = post_processing(detections, configs)
             t2 = time_synchronized()
 
-            detections = detections[0][1]  # only first batch
-            print(detections)
+            detections = detections[0][1]  # Only vehicle class
+            #print(detections)
             #######
             ####### ID_S3_EX1-5 END #######     
 
@@ -269,28 +279,27 @@ def detect_objects(input_bev_maps, model, configs):
     print("student task ID_S3_EX2")
     objects = [] 
     ## step 1 : check wether there are any detections
-    if detections is None:
-        print('There are no detections')
+    if len(detections[j]) > 0:
 
-    ## step 2 : loop over all detections
-    for row in detections:
-         # extract detection
-        _id, _x, _y, _z, _h, _w, _l, _yaw = row
+        ## step 2 : loop over all detections
+        for row in detections:
+            # extract detection
+            _id, _x, _y, _z, _h, _w, _l, _yaw = row
 
-        # convert from pixel into metric coordinates
-        x = _y/configs.bev_height * (configs.lim_x[1] - configs.lim_x[0])
-        y = _x/configs.bev_width * (configs.lim_y[1] - configs.lim_y[0]) - (configs.lim_y[1] - configs.lim_y[0])/2.0
-        w = _w / configs.bev_width  * (configs.lim_y[1] - configs.lim_y[0])
-        l = _l /configs.bev_height * (configs.lim_x[1] - configs.lim_x[0])
-        yaw = -_yaw
-        ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
-        if ((x >= configs.lim_x[0]) and (x <= configs.lim_x[1]) and (y >= configs.lim_y[0]) and (y <= configs.lim_y[1]) 
-            and (z >= configs.lim_z[0]) and (z <= configs.lim_z[1])):
+            # convert from pixel into metric coordinates
+            x = _y/configs.bev_height * (configs.lim_x[1] - configs.lim_x[0])
+            y = _x/configs.bev_width * (configs.lim_y[1] - configs.lim_y[0]) - (configs.lim_y[1] - configs.lim_y[0])/2.0
+            w = _w / configs.bev_width  * (configs.lim_y[1] - configs.lim_y[0])
+            l = _l /configs.bev_height * (configs.lim_x[1] - configs.lim_x[0])
+            #yaw = -_yaw
+            ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
+            if ((x >= configs.lim_x[0]) and (x <= configs.lim_x[1]) and (y >= configs.lim_y[0]) and (y <= configs.lim_y[1]) 
+                and (_z >= configs.lim_z[0]) and (_z <= configs.lim_z[1])):
 
-            ## step 4 : append the current object to the 'objects' array
-            objects.append([1, x,y,z,h,w,l,yaw])
+                ## step 4 : append the current object to the 'objects' array
+                objects.append([1, x, y, _z, _h, w, l, _yaw])
         
-    #tools.project_detections_into_bev(input_bev_maps,detections,configs,color=['red'])
+                #tools.project_detections_into_bev(input_bev_maps,detections,configs,color=['red'])
     #######
     ####### ID_S3_EX2 START #######   
     
