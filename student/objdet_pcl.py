@@ -62,7 +62,7 @@ def show_pcl(pcl):
 
     vis.register_key_callback(262,exit_key)
     vis.poll_events()
-    vis.run()
+    vis.run()  # Comment this out in order to go through multiple frames for detection without having to press all the time.
 
     #######
     ####### ID_S1_EX2 END #######     
@@ -110,7 +110,7 @@ def show_range_image(frame):
 
 
 # create birds-eye view of lidar data
-def bev_from_pcl(lidar_pcl, configs):
+def bev_from_pcl(lidar_pcl, configs,vis_pause_time):
 
     # remove lidar points outside detection area and with too low reflectivity
     mask = np.where((lidar_pcl[:, 0] >= configs.lim_x[0]) & (lidar_pcl[:, 0] <= configs.lim_x[1]) &
@@ -143,10 +143,10 @@ def bev_from_pcl(lidar_pcl, configs):
     
     ## step 2 : create a copy of the lidar pcl and transform all metrix x-coordinates into bev-image coordinates
     lidar_pcl_cpy = np.copy(lidar_pcl)
-    lidar_pcl_cpy[:, 1] = np.int_(np.floor(x_lidar / dsc_x))
+    lidar_pcl_cpy[:, 0] = np.int_(np.floor(x_lidar / dsc_x))
 
     # step 3 : perform the same operation as in step 2 for the y-coordinates but make sure that no negative bev-coordinates occur
-    lidar_pcl_cpy[:, 0] = np.int_(np.floor(y_lidar / dsc_x) + (configs.bev_width + 1) / 2)
+    lidar_pcl_cpy[:, 1] = np.int_(np.floor(y_lidar / dsc_x) + (configs.bev_width + 1) / 2)
     lidar_pcl_cpy[:, 2] = lidar_pcl_cpy[:, 2] - configs.lim_z[0] 
     #print(lidar_pcl_cpy.shape)
     
@@ -172,22 +172,20 @@ def bev_from_pcl(lidar_pcl, configs):
 
     ## step 3 : extract all points with identical x and y such that only the top-most z-coordinate is kept (use numpy.unique)
     ##          also, store the number of points per x,y-cell in a variable named "counts" for use in the next task
-
     index, unique, counts = np.unique(ar[:,0:2].astype(np.int), return_index= True, return_counts= True, axis = 0)
     
 
     ## step 4 : assign the intensity value of each unique entry in lidar_top_pcl to the intensity map 
     ##          make sure that the intensity is scaled in such a way that objects of interest (e.g. vehicles) are clearly visible    
     ##          also, make sure that the influence of outliers is mitigated by normalizing intensity on the difference between the max. and min. value within the point cloud
-    
     lidar_pcl_top = ar[unique]
-    intensity_map[index[:,1], index[:,0]] = lidar_pcl_top[:,3]/(lidar_pcl_top[:,3].max() - lidar_pcl_top[:,3].min())
+    intensity_map[index[:,0], index[:,1]] = lidar_pcl_top[:,3]/(lidar_pcl_top[:,3].max() - lidar_pcl_top[:,3].min())
     
     ## step 5 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background
     
     intensity_map_visual = (intensity_map * 256).astype(np.uint8)
     cv2.imshow('intensity map', intensity_map_visual)
-    cv2.waitKey(0) 
+    cv2.waitKey(vis_pause_time) 
 
     #plt.imshow(BEV,cmap='cool', interpolation='nearest')
     #plt.show()
@@ -207,13 +205,13 @@ def bev_from_pcl(lidar_pcl, configs):
 
     ## step 2 : assign the height value of each unique entry in lidar_top_pcl to the height map 
     ##          make sure that each entry is normalized on the difference between the upper and lower height defined in the config file
-    ##          use the lidar_pcl_top data structure from the previous task to access the pixels of the height_map
-    
-    height_map[np.int_(lidar_pcl_top[:, 1]), np.int_(lidar_pcl_top[:, 0])] = lidar_pcl_top[:, 2] / float(np.abs(configs.lim_z[1] - configs.lim_z[0]))
+    ##          use the lidar_pcl_top data structure from the previous task to access the pixels of the height_map 
+    height_map[np.int_(lidar_pcl_top[:, 0]), np.int_(lidar_pcl_top[:, 1])] = lidar_pcl_top[:, 2] / float(np.abs(configs.lim_z[1] - configs.lim_z[0]))
 
     ## step 3 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background
     cv2.imshow('height map', height_map)
-    cv2.waitKey(0)
+    cv2.waitKey(vis_pause_time)
+
     #######
     ####### ID_S2_EX3 END #######       
     
@@ -222,7 +220,7 @@ def bev_from_pcl(lidar_pcl, configs):
     density_map = np.zeros((configs.bev_height, configs.bev_width))
     _, _, counts = np.unique(lidar_pcl_cpy[:, 0:2], axis=0, return_index=True, return_counts=True)
     normalizedCounts = np.minimum(1.0, np.log(counts + 1) / np.log(64)) # used for model training, please do not change
-    density_map[np.int_(lidar_pcl_top[:, 1]), np.int_(lidar_pcl_top[:, 0])] = normalizedCounts
+    density_map[np.int_(lidar_pcl_top[:, 0]), np.int_(lidar_pcl_top[:, 1])] = normalizedCounts
         
     # assemble 3-channel bev-map from individual maps
     bev_map = np.zeros((3, configs.bev_height, configs.bev_width))

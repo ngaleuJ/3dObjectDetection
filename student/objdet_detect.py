@@ -203,6 +203,7 @@ def create_model(configs):
         #print('using resnet')
         configs = load_configs('fpn_resnet')
         model = waymo_utils.create_model(configs)
+        
         #######
         ####### ID_S3_EX1-4 END #######     
     
@@ -279,7 +280,7 @@ def detect_objects(input_bev_maps, model, configs):
     print("student task ID_S3_EX2")
     objects = [] 
     ## step 1 : check wether there are any detections
-    if len(detections[j]) > 0:
+    if len(detections) > 0:
 
         ## step 2 : loop over all detections
         for row in detections:
@@ -292,6 +293,7 @@ def detect_objects(input_bev_maps, model, configs):
             w = _w / configs.bev_width  * (configs.lim_y[1] - configs.lim_y[0])
             l = _l /configs.bev_height * (configs.lim_x[1] - configs.lim_x[0])
             #yaw = -_yaw
+
             ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
             if ((x >= configs.lim_x[0]) and (x <= configs.lim_x[1]) and (y >= configs.lim_y[0]) and (y <= configs.lim_y[1]) 
                 and (_z >= configs.lim_z[0]) and (_z <= configs.lim_z[1])):

@@ -89,23 +89,16 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
     ####### ID_S4_EX2 START #######     
     #######
     print("student task ID_S4_EX2")
-    '''
-    # compute positives and negatives for precision/recall
-    ## step 1 : compute the total number of positives present in the scene
-    all_positives = labels_valid.sum()
-    ## step 2 : compute the number of false negatives
-    false_negatives = all_positives - true_positives
-    ## step 3 : compute the number of false positives
-    false_positives = len(detections) - true_positives
-    '''
     # compute positives and negatives for precision/recall
     ## step 1 : compute the total number of positives present in the scene
     all_positives = 0
     for valid_labels in zip(labels_valid):
         if valid_labels[0] == True:
             all_positives += 1
+
     ## step 2 : compute the number of false negatives
     false_negatives = all_positives - true_positives
+    
     ## step 3 : compute the number of false positives
     false_positives = len(detections) - true_positives
     #######
@@ -134,12 +127,17 @@ def compute_performance_stats(det_performance_all):
     print('student task ID_S4_EX3')
 
     ## step 1 : extract the total number of positives, true positives, false negatives and false positives
-    
+    pos_negs_arr = np.asarray(pos_negs)
+    true_positives = sum(pos_negs_arr[:,1])
+    false_negatives = sum(pos_negs_arr[:,2])
+    false_positives = sum(pos_negs_arr[:,3])
+    print("TP = " + str(true_positives) + ", FP = " + str(false_positives) + ", FN = " + str(false_negatives))
+
     ## step 2 : compute precision
-    precision = 0.0
+    precision = true_positives / (true_positives + false_positives)
 
     ## step 3 : compute recall 
-    recall = 0.0
+    recall = true_positives / (true_positives + false_negatives)
 
     #######    
     ####### ID_S4_EX3 END #######     
