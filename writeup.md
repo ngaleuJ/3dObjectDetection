@@ -15,6 +15,12 @@ Please use this starter template to answer the following questions:
         		*This is frame 59 of the orignal range image from the first sub dataset of the waymo dataset. From this, we can clearly identify at least 6 vehicles.Zooming in the pcl using the viewer as you can see below, we are able to distinguish another distinct feature such as wheels*
         	
         ![frame_59_zoomed.png](.\img\frame_59_zoomed.png)
+        
+        ![frame_0.png](.\img\frame_0.png)
+        	*This is frame 0 of the third sub dataset of the waymo data set. From this we are able to identify at least 10 vehicles with varying degrees of visibility. Zooming in as we can see below, we can identify more distinct features some have large number of points and others only a few*
+        
+		![frame_0_zoomed.png](.\img\frame_0_zoomed.png)
+        	*From this PCL, we are able to identify more features like the windshield, front bumper and even the rear bumper of a truck. We can also distinguish the direction of movement of the vehicles. Oncoming and same driving direction.*
 
 	2. ## Creating birds-eye view from lidar point-cloud.
 		* In this section, we created a bird eyed view map(BEV) based on intensity, height and density from the PCL images we saw above. Below are examples of an intensity and height map we obtained. 
@@ -27,8 +33,12 @@ Please use this starter template to answer the following questions:
 
 	3. ## Model Based object detection in the bird-eye view image.
 		* Here, a pretrained model obtained from the *Super Fast and Accurate 3D Object Detection based on 3D LiDAR Point Clouds* is used to perfom detection on the images displayed above. This is mainly done on frame 50 to 150.
-			* 
+		* After runing the fpn resnet model, this is the detection obtained. 
 			
+		![resnetrun.png](.\img\resnetrun.png)
+
+		![ModelBasedOD.png](.\img\ModelBasedOD.png)
+
 	4. ## Performance evaluation for object detection. 
 		* We used the Intersection over union(IOU) we computed here in order to find pairings between the ground-truth labels and dectections. This was to be able to determine wether an object has been *(a) missed (false negative), (b) successfully detected (true positive) or (c) has been falsely reported (false positive)*.We obtained results such as
 		![Figure_1detect 150frames.png](.\img\Figure_1detect 150frames.png)
